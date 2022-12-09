@@ -1,0 +1,56 @@
+/* **************************************************************************
+ * Copywrite (c)  Innovative Data Solutions Inc. 2001 All Rights Reserved
+ *                No part of this program may be photocopied, reproduced,
+ *                or translated to another programming language without the
+ *                prior written consent of Innovative Data Solutions Inc.
+ ************************************************************************** */
+
+
+/* ****************************** File Header *******************************
+ * 
+ * File Name: net_serv.h
+ * 
+ * Description: 
+ * 
+ * Sccs Id:    %W% %G% %U%
+ * 
+ * Related Files/Documents: 
+ * 
+ * 
+ * Revision History 
+ * ________________ 
+ * Date      	Author    	Description 
+ * 
+ * Mar-26-2001	Hanna Bullata & Bassem El-Sayrafi	
+ * 
+ ************************************************************************** */
+
+#ifndef _NET_SERV_H_
+#define _NET_SERV_H_
+
+int getSocket();
+int clientCommunicate(int orig_sock);
+int handleClientRequest(int new_sock);
+void signalHandler(int sig);
+static void PrintUsage(char *name);
+static int HandleOptions(int argc, char *argv[]);
+void idsHeader(char *name);
+
+#define PROG_VERSION "Version 1.0 - September 02, 2001"
+#define SERV_LEN     64
+#define HELP_FLAG    "-u"
+#define INFO_FLAG    "-i"
+#define VERSION_FLAG "-v"
+#define SERVICE_FLAG "-s"
+#define PORT_FLAG    "-p"
+
+typedef struct _args {
+  int  info;
+  int  version;
+  char service[64];
+  int  service_port;
+} Args_Type;
+
+
+#endif
+
