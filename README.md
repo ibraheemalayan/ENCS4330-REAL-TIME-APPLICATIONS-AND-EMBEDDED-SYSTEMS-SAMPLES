@@ -10,6 +10,8 @@
 * [OpenGL](./5_opengl): various OpenGL examples
 * [Shared Memory](./6_shared_memory): shared memory, semaphores
 * [Sockets](./7_socket): sockets, servers, clients
+* [Threads](./8_threads): threads, pthread library
+
 
 ## Documentations & Notes
 
