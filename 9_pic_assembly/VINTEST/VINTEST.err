@@ -1,0 +1,16 @@
+Message[302] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 42 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 44 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 82 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 83 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 87 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 88 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 94 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 95 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 99 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 100 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 116 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 117 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\VINTEST.ASM 118 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\LCDIS.INC 26 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\LCDIS.INC 36 : Using default destination of 1 (file).
+Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\VINTEST\LCDIS.INC 61 : Using default destination of 1 (file).

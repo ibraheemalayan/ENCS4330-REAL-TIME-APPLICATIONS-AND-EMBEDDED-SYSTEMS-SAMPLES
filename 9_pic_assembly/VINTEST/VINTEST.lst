@@ -1,0 +1,662 @@
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00002 ;
+                      00003 ;       Project:                Interfacing PICs 
+                      00004 ;       Source File Name:       VINTEST.ASM             
+                      00005 ;       Devised by:             MPB             
+                      00006 ;       Date:                   19-12-05
+                      00007 ;       Status:                 Final version
+                      00008 ;
+                      00009 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00010 ;
+                      00011 ;       Demonstrates simple analogue input
+                      00012 ;       using an external reference voltage of 2.56V
+                      00013 ;       The 8-bit result is converted to BCD for display
+                      00014 ;       as a voltage using the standard LCD routines.
+                      00015 ;       
+                      00016 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00017 
+                      00018         PROCESSOR 16F877A
+                      00019 ;       Clock = XT 4MHz, standard fuse settings
+2007   3731           00020         __CONFIG 0x3731
+                      00021 
+                      00022 ;       LABEL EQUATES   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00023 
+                      00024         #INCLUDE "P16F877A.INC"         ; standard labels       
+                      00001         LIST
+                      00002 ; P16F877A.INC  Standard Header File, Version 1.00    Microchip Technology, Inc.
+                      00398         LIST
+                      00025 
+                      00026 ; GPR 70 - 75 allocated to included LCD display routine
+                      00027 
+  00000030            00028 count   EQU     30      ; Counter for ADC setup delay
+  00000031            00029 ADbin   EQU     31      ; Binary input value
+  00000032            00030 huns    EQU     32      ; Hundreds digit in decimal value
+  00000033            00031 tens    EQU     33      ; Tens digit in decimal value
+  00000034            00032 ones    EQU     34      ; Ones digit in decimal value
+                      00033 
+                      00034 ; PROGRAM BEGINS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00035 
+0000                  00036         ORG     0               ; Default start address 
+0000   0000           00037         NOP                     ; required for ICD mode
+                      00038         
+                      00039 ; Port & display setup.....................................
+                      00040 
+0001   1683 1303      00041         BANKSEL TRISC           ; Select bank 1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0003   0188           00042         CLRF    TRISD           ; Display port is output
+0004   3003           00043         MOVLW   B'00000011'     ; Analogue input setup code
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0005   009F           00044         MOVWF   ADCON1          ; Left justify result, 
+                      00045                                 ; Port A = analogue inputs
+                      00046 
+0006   1283 1303      00047         BANKSEL PORTC           ; Select bank 0
+0008   0188           00048         CLRF    PORTD           ; Clear display outputs
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0009   3041           00049         MOVLW   B'01000001'     ; Analogue input setup code
+000A   009F           00050         MOVWF   ADCON0          ; f/8, RA0, done, enable  
+                      00051 
+000B   2069           00052         CALL    inid            ; Initialise the display
+                      00053 
+                      00054 ; MAIN LOOP ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00055 
+000C   2010           00056 start   CALL    getADC          ; read input
+000D   2015           00057                 CALL    condec          ; convert to decimal
+000E   202C           00058                 CALL    putLCD          ; display input
+000F   280C           00059                 GOTO    start           ; jump to main loop
+                      00060 
+                      00061 ; SUBROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00062 
+                      00063 ; Read ADC input and store ................................
+                      00064 
+0010   151F           00065 getADC  BSF     ADCON0,GO       ; start ADC..
+0011   191F           00066 wait    BTFSC   ADCON0,GO       ; ..and wait for finish
+0012   2811           00067                 GOTO    wait
+0013   081E           00068                 MOVF    ADRESH,W        ; store result high byte
+0014   0008           00069                 RETURN                          
+                      00070         
+                      00071 ; Convert input to decimal ................................
+                      00072 
+0015   00B1           00073 condec  MOVWF   ADbin           ; get ADC result
+0016   01B2           00074                 CLRF    huns            ; zero hundreds digit
+0017   01B3           00075                 CLRF    tens            ; zero tens digit
+0018   01B4           00076                 CLRF    ones            ; zero ones digit
+                      00077 
+                      00078 ; Calclulate hundreds......................................
+                      00079 
+0019   1403           00080                 BSF     STATUS,C        ; set carry for subtract
+001A   3064           00081                 MOVLW   D'100'          ; load 100
+Message[305]: Using default destination of 1 (file).
+001B   02B1           00082 sub1    SUBWF   ADbin           ; and subtract from result
+Message[305]: Using default destination of 1 (file).
+001C   0AB2           00083                 INCF    huns            ; count number of loops
+001D   1803           00084                 BTFSC   STATUS,C        ; and check if done
+001E   281B           00085                 GOTO    sub1            ; no, carry on
+                      00086 
+Message[305]: Using default destination of 1 (file).
+001F   07B1           00087                 ADDWF   ADbin           ; yes, add 100 back on
+Message[305]: Using default destination of 1 (file).
+0020   03B2           00088                 DECF    huns            ; and correct loop count
+                      00089 
+                      00090 ; Calculate tens digit.....................................
+                      00091 
+0021   1403           00092                 BSF     STATUS,C        ; repeat process for tens
+0022   300A           00093                 MOVLW   D'10'           ; load 10
+Message[305]: Using default destination of 1 (file).
+0023   02B1           00094 sub2    SUBWF   ADbin           ; and subtract from result
+Message[305]: Using default destination of 1 (file).
+0024   0AB3           00095                 INCF    tens            ; count number of loops
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0025   1803           00096                 BTFSC   STATUS,C        ; and check if done
+0026   2823           00097                 GOTO    sub2            ; no, carry on
+                      00098 
+Message[305]: Using default destination of 1 (file).
+0027   07B1           00099                 ADDWF   ADbin           ; yes, add 100 back on
+Message[305]: Using default destination of 1 (file).
+0028   03B3           00100                 DECF    tens            ; and correct loop count
+0029   0831           00101                 MOVF    ADbin,W         ; load remainder
+002A   00B4           00102                 MOVWF   ones            ; and store as ones digit
+                      00103 
+002B   0008           00104                 RETURN                          ; done
+                      00105 
+                      00106 ; Output to display........................................
+                      00107 
+002C   10F4           00108 putLCD  BCF     Select,RS       ; set display command mode
+002D   3080           00109                 MOVLW   080             ; code to home cursor
+002E   2059           00110                 CALL    send    ; output it to display
+002F   14F4           00111                 BSF     Select,RS       ; and restore data mode
+                      00112 
+                      00113 ; Convert digits to ASCII and display......................
+                      00114 
+0030   3030           00115         MOVLW   030                     ; load ASCII offset
+Message[305]: Using default destination of 1 (file).
+0031   07B2           00116         ADDWF   huns            ; convert hundreds to ASCII
+Message[305]: Using default destination of 1 (file).
+0032   07B3           00117         ADDWF   tens            ; convert tens to ASCII
+Message[305]: Using default destination of 1 (file).
+0033   07B4           00118         ADDWF   ones            ; convert ones to ASCII
+                      00119 
+0034   0832           00120         MOVF    huns,W          ; load hundreds code
+0035   2059           00121         CALL    send            ; and send to display
+0036   302E           00122         MOVLW   '.'                     ; load point code
+0037   2059           00123         CALL    send            ; and output
+0038   0833           00124         MOVF    tens,W          ; load tens code
+0039   2059           00125         CALL    send            ; and output
+003A   0834           00126         MOVF    ones,W          ; load ones code
+003B   2059           00127         CALL    send            ; and output
+003C   3020           00128         MOVLW   ' '                     ; load space code
+003D   2059           00129         CALL    send            ; and output
+003E   3056           00130         MOVLW   'V'                     ; load volts code
+003F   2059           00131         CALL    send            ; and output
+0040   306F           00132         MOVLW   'o'                     ; load volts code
+0041   2059           00133         CALL    send            ; and output
+0042   306C           00134         MOVLW   'l'                     ; load volts code
+0043   2059           00135         CALL    send            ; and output
+0044   3074           00136         MOVLW   't'                     ; load volts code
+0045   2059           00137         CALL    send            ; and output
+0046   3073           00138         MOVLW   's'                     ; load volts code
+0047   2059           00139         CALL    send            ; and output
+                      00140 
+0048   0008           00141         RETURN                          ; done
+                      00142 
+                      00143 ; INCLUDED ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00144 
+                      00145 ; Include LCD driver routines
+                      00146 ;
+                      00147         #INCLUDE "LCDIS.INC"
+                      00001 ;       LCDIS.INC               MPB     19-12-05
+                      00002 ;
+                      00003 ;       Include file to operate 16x2 LCD display
+                      00004 ;       Uses GPR 70 - 75
+                      00005 ;       
+                      00006 ;       Final version
+                      00007 ;-------------------------------------------------------------------------------------------
+                      00008 
+  00000070            00009 Timer1  EQU     70              ; 1ms count register
+  00000071            00010 TimerX  EQU     71              ; Xms count register
+  00000072            00011 Var     EQU     72              ; Output variable
+  00000073            00012 Point   EQU     73              ; Program table pointer
+  00000074            00013 Select  EQU     74              ; Used to set or clear RS bit
+  00000075            00014 OutCod  EQU     75              ; Temp store for output code
+                      00015 
+  00000001            00016 RS      EQU     1               ; Register select output bit
+  00000002            00017 E       EQU     2               ; Enable output clocks display input
+                      00018 
+                      00019 
+                      00020 ;--------------------------------------------------------------------------------------------   
+                      00021 ;       1ms delay with 1us cycle time (1000 cycles)
+                      00022 ;--------------------------------------------------------------------------------------------   
+0049   30F9           00023 onems   MOVLW   D'249'          ; Count for 1ms delay 
+004A   00F0           00024         MOVWF   Timer1          ; Load count
+004B   0000           00025 loop1   NOP                     ; Pad for 4 cycle loop
+Message[305]: Using default destination of 1 (file).
+004C   0BF0           00026         DECFSZ  Timer1          ; Count
+004D   284B           00027         GOTO    loop1           ; until Z
+004E   0008           00028         RETURN                  ; and finish
+                      00029 
+                      00030 ;---------------------------------------------------------------------------------------------  
+                      00031 ;       Delay Xms
+                      00032 ;       Receives count in W, uses Onems
+                      00033 ;---------------------------------------------------------------------------------------------  
+004F   00F1           00034 xms     MOVWF   TimerX          ; Count for X ms
+0050   2049           00035 loopX   CALL    onems           ; Delay 1ms
+Message[305]: Using default destination of 1 (file).
+0051   0BF1           00036         DECFSZ  TimerX          ; Repeat X times 
+0052   2850           00037         GOTO    loopX           ; until Z
+0053   0008           00038         RETURN                  ; and finish
+                      00039 
+                      00040 ;---------------------------------------------------------------------------------------------  
+                      00041 ;       Generate data/command clock siganl E
+                      00042 ;---------------------------------------------------------------------------------------------  
+0054   1508           00043 pulseE  BSF     PORTD,E         ; Set E high
+0055   2049           00044         CALL    onems           ; Delay 1ms
+0056   1108           00045         BCF     PORTD,E         ; Reset E low
+0057   2049           00046         CALL    onems           ; Delay 1ms
+0058   0008           00047         RETURN                  ; done
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00048 
+                      00049 ;---------------------------------------------------------------------------------------------  
+                      00050 ;       Send a command byte in two nibbles from RB4 - RB7
+                      00051 ;       Receives command in W, uses PulseE and Onems
+                      00052 ;---------------------------------------------------------------------------------------------  
+0059   00F5           00053 send    MOVWF   OutCod          ; Store output code
+005A   39F0           00054         ANDLW   0F0             ; Clear low nybble
+005B   0088           00055         MOVWF   PORTD           ; Output high nybble
+005C   18F4           00056         BTFSC   Select,RS       ; Test RS bit
+005D   1488           00057         BSF     PORTD,RS        ; and set for data
+005E   2054           00058         CALL    pulseE          ; and clock display register
+005F   2049           00059         CALL    onems           ; wait 1ms for display to complete
+                      00060 
+Message[305]: Using default destination of 1 (file).
+0060   0EF5           00061         SWAPF   OutCod          ; Swap low and high nybbles 
+0061   0875           00062         MOVF    OutCod,W        ; Retrieve output code
+0062   39F0           00063         ANDLW   0F0             ; Clear low nybble
+0063   0088           00064         MOVWF   PORTD           ; Output low nybble
+0064   18F4           00065         BTFSC   Select,RS       ; Test RS bit
+0065   1488           00066         BSF     PORTD,RS        ; and set for data
+0066   2054           00067         CALL    pulseE          ; and clock display register
+0067   2049           00068         CALL    onems           ; wait 1ms for display to complete
+0068   0008           00069         RETURN                  ; done
+                      00070 
+                      00071 ;---------------------------------------------------------------------------------------------  
+                      00072 ;       Initialise the display
+                      00073 ;       Uses Send
+                      00074 ;---------------------------------------------------------------------------------------------  
+0069   3064           00075 inid    MOVLW   D'100'          ; Load count for 100ms delay
+006A   204F           00076         CALL    xms             ; and wait for display start
+006B   30F0           00077         MOVLW   0F0             ; Mask for select code
+006C   00F4           00078         MOVWF   Select          ; High nybble not masked
+                      00079 
+006D   3030           00080         MOVLW   0x30            ; Load initial nibble
+006E   0088           00081         MOVWF   PORTD           ; and output it to display
+006F   2054           00082         CALL    pulseE          ; Latch initial code
+0070   3005           00083         MOVLW   D'5'            ; Set delay 5ms
+0071   204F           00084         CALL    xms             ; and wait
+0072   2054           00085         CALL    pulseE          ; Latch initial code again
+0073   2049           00086         CALL    onems           ; Wait 1ms
+0074   2054           00087         CALL    pulseE          ; Latch initial code again
+0075   1208           00088         BCF     PORTD,4         ; Set 4-bit mode
+0076   2054           00089         CALL    pulseE          ; Latch it
+                      00090         
+0077   3028           00091         MOVLW   0x28            ; Set 4-bit mode, 2 lines
+0078   2059           00092         CALL    send            ; and send code
+0079   3008           00093         MOVLW   0x08            ; Switch off display
+007A   2059           00094         CALL    send            ; and send code
+007B   3001           00095         MOVLW   0x01            ; Code to clear display
+007C   2059           00096         CALL    send            ; and send code
+007D   3006           00097         MOVLW   0x06            ; Enable cursor auto inc  
+007E   2059           00098         CALL    send            ; and send code
+007F   3080           00099         MOVLW   0x80            ; Zero display address
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0080   2059           00100         CALL    send            ; and send code
+0081   300C           00101         MOVLW   0x0C            ; Turn on display  
+0082   2059           00102         CALL    send            ; and send code
+                      00103 
+0083   0008           00104         RETURN                  ; Done
+                      00105         
+                      00148 ;       Contains routines:
+                      00149 ;       inid:   Initialises display
+                      00150 ;       onems:  1 ms delay
+                      00151 ;       xms:    X ms delay
+                      00152 ;               Receives X in W
+                      00153 ;       send:   Sends a character to display
+                      00154 ;               Receives: Control code in W (Select,RS=0)
+                      00155 ;                         ASCII character code in W (RS=1)      
+                      00156 
+                      00157         END     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ADbin                             00000031
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+CHS1                              00000004
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+D_A                               00000005
+E                                 00000002
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+OutCod                            00000075
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+Point                             00000073
+R                                 00000002
+RBIE                              00000003
+RBIF                              00000000
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+READ_WRITE                        00000002
+RP0                               00000005
+RP1                               00000006
+RS                                00000001
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+R_W                               00000002
+S                                 00000003
+SEN                               00000000
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SYNC                              00000004
+Select                            00000074
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISB                             00000086
+TRISC                             00000087
+TRISD                             00000088
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+Timer1                            00000070
+TimerX                            00000071
+UA                                00000001
+Var                               00000072
+W                                 00000000
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_HS_OSC                           00003FFE
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+MPASM  5.50                       VINTEST.ASM   12-12-2018  9:30:41         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+__DEBUG                           1
+condec                            00000015
+count                             00000030
+getADC                            00000010
+huns                              00000032
+inid                              00000069
+loop1                             0000004B
+loopX                             00000050
+onems                             00000049
+ones                              00000034
+pulseE                            00000054
+putLCD                            0000002C
+send                              00000059
+start                             0000000C
+sub1                              0000001B
+sub2                              00000023
+tens                              00000033
+wait                              00000011
+xms                               0000004F
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXX------------ ---------------- ---------------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   132
+Program Memory Words Free:  8060
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :    16 reported,     0 suppressed
+
+

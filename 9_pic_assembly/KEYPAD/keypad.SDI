@@ -1,0 +1,96 @@
+,,,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,;
+,,,;       KEYPAD.ASM      MPB     Ver 1.0         28-8-05
+,,,;
+,,,;       Reads keypad and shows digit on display
+,,,;       Design file KEYPAD.DSN
+,,,;
+,,,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+,,,        PROCESSOR 16F877
+,,,
+,,,PCL     EQU     002             ; Program Counter
+,,,PORTC   EQU     007             ; 7-Segment display
+,,,PORTD   EQU     008             ; 3x4 keypad
+,,,
+,,,TRISC   EQU     087             ; Data direction
+,,,TRISD   EQU     088             ; registers
+,,,
+,,,Key     EQU     020             ; Count of keys
+,,,
+,,,; Initialise ports.........................................
+,,,
+00000000,1683 1303,,        BANKSEL TRISC           ; Display
+00000002,0103,,        CLRW                    ; all outputs
+00000003,0087,,        MOVWF   TRISC           ;
+00000004,3007,,        MOVLW   B'00000111'     ; Keypad
+00000005,0088,,        MOVWF   TRISD           ; bidirectional
+,,,
+00000006,1283 1303,,        BANKSEL PORTC           ; Display off
+00000008,0187,,        CLRF    PORTC           ; initially
+00000009,2830,,        GOTO    main            ; jump to main
+,,,
+,,,; Check a row of keys .....................................
+,,,
+0000000A,0AA0,row,row     INCF    Key             ; Count first key
+0000000B,1C08,,        BTFSS   PORTD,0         ; Check key
+0000000C,281D,,        GOTO    found           ; and quit if on
+,,,
+0000000D,0AA0,,        INCF    Key             ; and repeat
+0000000E,1C88,,        BTFSS   PORTD,1         ; for second
+0000000F,281D,,        GOTO    found           ; key
+,,,
+00000010,0AA0,,        INCF    Key             ; and repeat
+00000011,1D08,,        BTFSS   PORTD,2         ; for third
+00000012,281D,,        GOTO    found           ; key
+00000013,2818,,        GOTO    next            ; go for next row
+,,,
+,,,; Scan the keypad..........................................
+,,,
+00000014,01A0,scan,scan    CLRF    Key             ; Zero key count
+00000015,1403,,        BSF     3,0             ; Set Carry Flag
+00000016,1208,,        BCF     PORTD,4         ; Select first row
+00000017,280A,newrow,newrow  GOTO    row             ; check row
+,,,
+00000018,1588,next,next    BSF     PORTD,3         ; Set fill bit
+00000019,0D88,,        RLF     PORTD           ; Select next row
+0000001A,1803,,        BTFSC   3,0             ; 0 into carry flag?
+0000001B,2817,,        GOTO    newrow          ; if not, next row
+0000001C,2814,,        GOTO    scan            ; if so, start again
+,,,
+0000001D,0008,found,found   RETURN                  ; quit with key count
+,,,
+,,,; Display code table.......................................
+,,,
+0000001E,0820,table,table   MOVF    Key,W           ; Get key count
+0000001F,0782,,        ADDWF   PCL             ; and calculate jump
+00000020,0000,,        NOP                     ; into table
+00000021,340C,,        RETLW   B'00001100'     ; Code for '1'
+00000022,34B6,,        RETLW   B'10110110'     ; Code for '2'
+00000023,349E,,        RETLW   B'10011110'     ; Code for '3'
+00000024,34CC,,        RETLW   B'11001100'     ; Code for '4'
+00000025,34DA,,        RETLW   B'11011010'     ; Code for '5'
+00000026,34F8,,        RETLW   B'11111000'     ; Code for '6'
+00000027,340E,,        RETLW   B'00001110'     ; Code for '7'
+00000028,34FE,,        RETLW   B'11111110'     ; Code for '8'
+00000029,34CE,,        RETLW   B'11001110'     ; Code for '9'
+0000002A,3492,,        RETLW   B'10010010'     ; Code for '*'
+0000002B,347E,,        RETLW   B'01111110'     ; Code for '0'
+0000002C,34EC,,        RETLW   B'11101100'     ; Code for '#'
+,,,
+,,,; Output display code......................................
+,,,
+0000002D,201E,show,show    CALL    table           ; Get display code
+0000002E,0087,,        MOVWF   PORTC           ; and show it
+0000002F,0008,,        RETURN
+,,,
+,,,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+,,,; Read keypad & display....
+,,,
+00000030,30FF,main,main    MOVLW   0FF             ; Set all outputs
+00000031,0088,,        MOVWF   PORTD           ; to keypad high
+00000032,2014,,        CALL    scan            ; Get key number
+00000033,202D,,        CALL    show            ; and dsiplay it
+00000034,2830,,        GOTO    main            ; and repeat
+,,,        END

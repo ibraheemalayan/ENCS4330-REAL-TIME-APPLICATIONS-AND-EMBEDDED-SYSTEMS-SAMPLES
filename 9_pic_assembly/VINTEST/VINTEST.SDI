@@ -1,0 +1,262 @@
+,,,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,;
+,,,;       Project:                Interfacing PICs
+,,,;       Source File Name:       VINTEST.ASM
+,,,;       Devised by:             MPB
+,,,;       Date:                   19-12-05
+,,,;       Status:                 Final version
+,,,;
+,,,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,;
+,,,;       Demonstrates simple analogue input
+,,,;       using an external reference voltage of 2.56V
+,,,;       The 8-bit result is converted to BCD for display
+,,,;       as a voltage using the standard LCD routines.
+,,,;
+,,,;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+,,,        PROCESSOR 16F877A
+,,,;       Clock = XT 4MHz, standard fuse settings
+00002007,3731,,        __CONFIG 0x3731
+,,,
+,,,;       LABEL EQUATES   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+,,,        #INCLUDE "P16F877A.INC"         ; standard labels
+,,,
+,,,; GPR 70 - 75 allocated to included LCD display routine
+,,,
+,,,count   EQU     30      ; Counter for ADC setup delay
+,,,ADbin   EQU     31      ; Binary input value
+,,,huns    EQU     32      ; Hundreds digit in decimal value
+,,,tens    EQU     33      ; Tens digit in decimal value
+,,,ones    EQU     34      ; Ones digit in decimal value
+,,,
+,,,; PROGRAM BEGINS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+,,,        ORG     0               ; Default start address
+00000000,0000,,        NOP                     ; required for ICD mode
+,,,
+,,,; Port & display setup.....................................
+,,,
+00000001,1683 1303,,        BANKSEL TRISC           ; Select bank 1
+00000003,0188,,        CLRF    TRISD           ; Display port is output
+00000004,3003,,        MOVLW   B'00000011'     ; Analogue input setup code
+00000005,009F,,        MOVWF   ADCON1          ; Left justify result,
+,,,                                ; Port A = analogue inputs
+,,,
+00000006,1283 1303,,        BANKSEL PORTC           ; Select bank 0
+00000008,0188,,        CLRF    PORTD           ; Clear display outputs
+00000009,3041,,        MOVLW   B'01000001'     ; Analogue input setup code
+0000000A,009F,,        MOVWF   ADCON0          ; f/8, RA0, done, enable
+,,,
+0000000B,2069,,        CALL    inid            ; Initialise the display
+,,,
+,,,; MAIN LOOP ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+0000000C,2010,start,start   CALL    getADC          ; read input
+0000000D,2015,,        CALL    condec          ; convert to decimal
+0000000E,202C,,        CALL    putLCD          ; display input
+0000000F,280C,,        GOTO    start           ; jump to main loop
+,,,
+,,,; SUBROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+,,,; Read ADC input and store ................................
+,,,
+00000010,151F,getADC,getADC  BSF     ADCON0,GO       ; start ADC..
+00000011,191F,wait,wait    BTFSC   ADCON0,GO       ; ..and wait for finish
+00000012,2811,,        GOTO    wait
+00000013,081E,,        MOVF    ADRESH,W        ; store result high byte
+00000014,0008,,        RETURN
+,,,
+,,,; Convert input to decimal ................................
+,,,
+00000015,00B1,condec,condec  MOVWF   ADbin           ; get ADC result
+00000016,01B2,,        CLRF    huns            ; zero hundreds digit
+00000017,01B3,,        CLRF    tens            ; zero tens digit
+00000018,01B4,,        CLRF    ones            ; zero ones digit
+,,,
+,,,; Calclulate hundreds......................................
+,,,
+00000019,1403,,        BSF     STATUS,C        ; set carry for subtract
+0000001A,3064,,        MOVLW   D'100'          ; load 100
+0000001B,02B1,sub1,sub1    SUBWF   ADbin           ; and subtract from result
+0000001C,0AB2,,        INCF    huns            ; count number of loops
+0000001D,1803,,        BTFSC   STATUS,C        ; and check if done
+0000001E,281B,,        GOTO    sub1            ; no, carry on
+,,,
+0000001F,07B1,,        ADDWF   ADbin           ; yes, add 100 back on
+00000020,03B2,,        DECF    huns            ; and correct loop count
+,,,
+,,,; Calculate tens digit.....................................
+,,,
+00000021,1403,,        BSF     STATUS,C        ; repeat process for tens
+00000022,300A,,        MOVLW   D'10'           ; load 10
+00000023,02B1,sub2,sub2    SUBWF   ADbin           ; and subtract from result
+00000024,0AB3,,        INCF    tens            ; count number of loops
+00000025,1803,,        BTFSC   STATUS,C        ; and check if done
+00000026,2823,,        GOTO    sub2            ; no, carry on
+,,,
+00000027,07B1,,        ADDWF   ADbin           ; yes, add 100 back on
+00000028,03B3,,        DECF    tens            ; and correct loop count
+00000029,0831,,        MOVF    ADbin,W         ; load remainder
+0000002A,00B4,,        MOVWF   ones            ; and store as ones digit
+,,,
+0000002B,0008,,        RETURN                  ; done
+,,,
+,,,; Output to display........................................
+,,,
+0000002C,10F4,putLCD,putLCD  BCF     Select,RS       ; set display command mode
+0000002D,3080,,        MOVLW   080             ; code to home cursor
+0000002E,2059,,        CALL    send            ; output it to display
+0000002F,14F4,,        BSF     Select,RS       ; and restore data mode
+,,,
+,,,; Convert digits to ASCII and display......................
+,,,
+00000030,3030,,        MOVLW   030             ; load ASCII offset
+00000031,07B2,,        ADDWF   huns            ; convert hundreds to ASCII
+00000032,07B3,,        ADDWF   tens            ; convert tens to ASCII
+00000033,07B4,,        ADDWF   ones            ; convert ones to ASCII
+,,,
+00000034,0832,,        MOVF    huns,W          ; load hundreds code
+00000035,2059,,        CALL    send            ; and send to display
+00000036,302E,,        MOVLW   '.'             ; load point code
+00000037,2059,,        CALL    send            ; and output
+00000038,0833,,        MOVF    tens,W          ; load tens code
+00000039,2059,,        CALL    send            ; and output
+0000003A,0834,,        MOVF    ones,W          ; load ones code
+0000003B,2059,,        CALL    send            ; and output
+0000003C,3020,,        MOVLW   ' '             ; load space code
+0000003D,2059,,        CALL    send            ; and output
+0000003E,3056,,        MOVLW   'V'             ; load volts code
+0000003F,2059,,        CALL    send            ; and output
+00000040,306F,,        MOVLW   'o'             ; load volts code
+00000041,2059,,        CALL    send            ; and output
+00000042,306C,,        MOVLW   'l'             ; load volts code
+00000043,2059,,        CALL    send            ; and output
+00000044,3074,,        MOVLW   't'             ; load volts code
+00000045,2059,,        CALL    send            ; and output
+00000046,3073,,        MOVLW   's'             ; load volts code
+00000047,2059,,        CALL    send            ; and output
+,,,
+00000048,0008,,        RETURN                  ; done
+,,,
+,,,; INCLUDED ROUTINES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+,,,
+,,,; Include LCD driver routines
+,,,;
+,,,        #INCLUDE "LCDIS.INC"
+,,,;       LCDIS.INC               MPB     19-12-05
+,,,;
+,,,;       Include file to operate 16x2 LCD display
+,,,;       Uses GPR 70 - 75
+,,,;
+,,,;       Final version
+,,,;-------------------------------------------------------------------------------------------
+,,,
+,,,Timer1  EQU     70              ; 1ms count register
+,,,TimerX  EQU     71              ; Xms count register
+,,,Var     EQU     72              ; Output variable
+,,,Point   EQU     73              ; Program table pointer
+,,,Select  EQU     74              ; Used to set or clear RS bit
+,,,OutCod  EQU     75              ; Temp store for output code
+,,,
+,,,RS      EQU     1               ; Register select output bit
+,,,E       EQU     2               ; Enable output clocks display input
+,,,
+,,,
+,,,;--------------------------------------------------------------------------------------------
+,,,;       1ms delay with 1us cycle time (1000 cycles)
+,,,;--------------------------------------------------------------------------------------------
+00000049,30F9,onems,onems   MOVLW   D'249'          ; Count for 1ms delay
+0000004A,00F0,,        MOVWF   Timer1          ; Load count
+0000004B,0000,loop1,loop1   NOP                     ; Pad for 4 cycle loop
+0000004C,0BF0,,        DECFSZ  Timer1          ; Count
+0000004D,284B,,        GOTO    loop1           ; until Z
+0000004E,0008,,        RETURN                  ; and finish
+,,,
+,,,;---------------------------------------------------------------------------------------------
+,,,;       Delay Xms
+,,,;       Receives count in W, uses Onems
+,,,;---------------------------------------------------------------------------------------------
+0000004F,00F1,xms,xms     MOVWF   TimerX          ; Count for X ms
+00000050,2049,loopX,loopX   CALL    onems           ; Delay 1ms
+00000051,0BF1,,        DECFSZ  TimerX          ; Repeat X times
+00000052,2850,,        GOTO    loopX           ; until Z
+00000053,0008,,        RETURN                  ; and finish
+,,,
+,,,;---------------------------------------------------------------------------------------------
+,,,;       Generate data/command clock siganl E
+,,,;---------------------------------------------------------------------------------------------
+00000054,1508,pulseE,pulseE  BSF     PORTD,E         ; Set E high
+00000055,2049,,        CALL    onems           ; Delay 1ms
+00000056,1108,,        BCF     PORTD,E         ; Reset E low
+00000057,2049,,        CALL    onems           ; Delay 1ms
+00000058,0008,,        RETURN                  ; done
+,,,
+,,,;---------------------------------------------------------------------------------------------
+,,,;       Send a command byte in two nibbles from RB4 - RB7
+,,,;       Receives command in W, uses PulseE and Onems
+,,,;---------------------------------------------------------------------------------------------
+00000059,00F5,send,send    MOVWF   OutCod          ; Store output code
+0000005A,39F0,,        ANDLW   0F0             ; Clear low nybble
+0000005B,0088,,        MOVWF   PORTD           ; Output high nybble
+0000005C,18F4,,        BTFSC   Select,RS       ; Test RS bit
+0000005D,1488,,        BSF     PORTD,RS        ; and set for data
+0000005E,2054,,        CALL    pulseE          ; and clock display register
+0000005F,2049,,        CALL    onems           ; wait 1ms for display to complete
+,,,
+00000060,0EF5,,        SWAPF   OutCod          ; Swap low and high nybbles
+00000061,0875,,        MOVF    OutCod,W        ; Retrieve output code
+00000062,39F0,,        ANDLW   0F0             ; Clear low nybble
+00000063,0088,,        MOVWF   PORTD           ; Output low nybble
+00000064,18F4,,        BTFSC   Select,RS       ; Test RS bit
+00000065,1488,,        BSF     PORTD,RS        ; and set for data
+00000066,2054,,        CALL    pulseE          ; and clock display register
+00000067,2049,,        CALL    onems           ; wait 1ms for display to complete
+00000068,0008,,        RETURN                  ; done
+,,,
+,,,;---------------------------------------------------------------------------------------------
+,,,;       Initialise the display
+,,,;       Uses Send
+,,,;---------------------------------------------------------------------------------------------
+00000069,3064,inid,inid    MOVLW   D'100'          ; Load count for 100ms delay
+0000006A,204F,,        CALL    xms             ; and wait for display start
+0000006B,30F0,,        MOVLW   0F0             ; Mask for select code
+0000006C,00F4,,        MOVWF   Select          ; High nybble not masked
+,,,
+0000006D,3030,,        MOVLW   0x30            ; Load initial nibble
+0000006E,0088,,        MOVWF   PORTD           ; and output it to display
+0000006F,2054,,        CALL    pulseE          ; Latch initial code
+00000070,3005,,        MOVLW   D'5'            ; Set delay 5ms
+00000071,204F,,        CALL    xms             ; and wait
+00000072,2054,,        CALL    pulseE          ; Latch initial code again
+00000073,2049,,        CALL    onems           ; Wait 1ms
+00000074,2054,,        CALL    pulseE          ; Latch initial code again
+00000075,1208,,        BCF     PORTD,4         ; Set 4-bit mode
+00000076,2054,,        CALL    pulseE          ; Latch it
+,,,
+00000077,3028,,        MOVLW   0x28            ; Set 4-bit mode, 2 lines
+00000078,2059,,        CALL    send            ; and send code
+00000079,3008,,        MOVLW   0x08            ; Switch off display
+0000007A,2059,,        CALL    send            ; and send code
+0000007B,3001,,        MOVLW   0x01            ; Code to clear display
+0000007C,2059,,        CALL    send            ; and send code
+0000007D,3006,,        MOVLW   0x06            ; Enable cursor auto inc
+0000007E,2059,,        CALL    send            ; and send code
+0000007F,3080,,        MOVLW   0x80            ; Zero display address
+00000080,2059,,        CALL    send            ; and send code
+00000081,300C,,        MOVLW   0x0C            ; Turn on display
+00000082,2059,,        CALL    send            ; and send code
+,,,
+00000083,0008,,        RETURN                  ; Done
+,,,
+,,,;       Contains routines:
+,,,;       inid:   Initialises display
+,,,;       onems:  1 ms delay
+,,,;       xms:    X ms delay
+,,,;               Receives X in W
+,,,;       send:   Sends a character to display
+,,,;               Receives: Control code in W (Select,RS=0)
+,,,;                         ASCII character code in W (RS=1)
+,,,
+,,,        END     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

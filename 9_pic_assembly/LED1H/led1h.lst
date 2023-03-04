@@ -1,0 +1,124 @@
+MPASM  5.50                         LED1H.ASM   5-2-2020  14:30:37         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00002 ;
+                      00003 ;       Source File:    LED1H.ASM               
+                      00004 ;       Author:         MPB              
+                      00005 ;       Date:           2-12-05      
+                      00006 ;
+                      00007 ;       Output binary count incremented
+                      00008 ;       and reset with push buttons. 
+                      00009 ;       Uses hardware timer to debounce input switch
+                      00010 ;
+                      00011 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+                      00012 
+                      00013         PROCESSOR 16F877        ; Define MCU type
+2007   3733           00014         __CONFIG 0x3733         ; Set config fuses
+                      00015 
+                      00016 ; Register Label Equates....................................
+                      00017 
+  00000006            00018 PORTB   EQU 06  ; Port B Data Register        
+  00000008            00019 PORTD   EQU 08  ; Port D Data Register  
+  00000088            00020 TRISD   EQU     88      ; Port D Direction Register
+  00000001            00021 TMR0    EQU     01      ; Hardware Timer Register
+  0000000B            00022 INTCON  EQU     0B      ; Interrupt Control Register
+  00000081            00023 OPTREG  EQU     81      ; Option Register
+                      00024 
+                      00025 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00026 
+0000                  00027         ORG     000             ; Start of program memory
+0000   0000           00028         NOP                     ; For ICD mode
+0001   2806           00029         GOTO    init            ; Jump to main program
+                      00030 
+                      00031 ; Interrupt Service Routine ................................
+                      00032 
+0004                  00033         ORG     004
+0004   110B           00034         BCF     INTCON,2        ; Reset TMR0 interrupt flag
+0005   0009           00035         RETFIE                  ; Return from interrupt
+                      00036 
+                      00037 ; Initialise Port D (Port B defaults to inputs).............
+                      00038         
+0006   0000           00039 init    NOP                     ; BANKSEL cannot be labelled
+0007   1683 1303      00040                 BANKSEL TRISD           ; Select bank 1
+Warning[207]: Found label after column 1. (MOVLZ)
+Error[124]  : Illegal argument (expected single character)
+0009   2830           00041         MOVLZ   b'00000000'     ; Port B Direction Code
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   0088           00042         MOVWF   TRISD           ; Load the DDR code into F86
+                      00043 
+                      00044 ; Initialise Timer0 ........................................
+                      00045 
+000B   30D8           00046         MOVLW   b'11011000'     ; TMR0 initialisation code
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000C   0081           00047         MOVWF   OPTREG          ; Int clock, no prescale        
+000D   1283 1303      00048         BANKSEL PORTD           ; Select bank 0
+000F   30A0           00049         MOVLW   b'10100000'     ; INTCON init. code
+MPASM  5.50                         LED1H.ASM   5-2-2020  14:30:37         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0010   008B           00050         MOVWF   INTCON          ; Enable TMR0 interrupt
+                      00051 
+                      00052 ; Start main loop ...........................................
+                      00053 
+0011   0188           00054 reset   CLRF    PORTD           ; Clear Port B Data 
+                      00055 
+0012   1C86           00056 start   BTFSS   PORTB,1         ; Test reset button
+0013   2811           00057         GOTO    reset           ; and reset Port B if pressed
+0014   1906           00058         BTFSC   PORTB,2         ; Test step button
+0015   2812           00059         GOTO    start           ; and repeat if not pressed
+                      00060 
+0016   0181           00061                 CLRF    TMR0            ; Reset timer
+0017   1D0B           00062 wait    BTFSS   INTCON,2        ; Check for time out
+0018   2817           00063                 GOTO    wait            ; Wait if not
+0019   1D06           00064 stepin  BTFSS   PORTB,2         ; Check step button
+001A   2819           00065                 GOTO    stepin          ; and wait until released
+Message[305]: Using default destination of 1 (file).
+001B   0A88           00066         INCF    PORTD           ; Increment output at Port B 
+001C   2812           00067         GOTO    start           ; Repeat main loop always
+                      00068 
+                      00069         END                     ; Terminate source code......
+MPASM  5.50                         LED1H.ASM   5-2-2020  14:30:37         PAGE  3
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTCON                            0000000B
+MOVLZ                             00000009
+OPTREG                            00000081
+PORTB                             00000006
+PORTD                             00000008
+TMR0                              00000001
+TRISD                             00000088
+__16F877A                         00000001
+__DEBUG                           1
+init                              00000006
+reset                             00000011
+start                             00000012
+stepin                            00000019
+wait                              00000017
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : XX--XXXXXXXXXXXX XXXXXXXXXXXXX--- ---------------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:    27
+Program Memory Words Free:  8165
+
+
+Errors   :     1
+Warnings :     1 reported,     0 suppressed
+Messages :     3 reported,     0 suppressed
+
+
