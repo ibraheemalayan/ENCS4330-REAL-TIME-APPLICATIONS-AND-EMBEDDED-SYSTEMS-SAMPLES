@@ -5,8 +5,8 @@ This repository contains code samples and resources for the [ENCS4330 - Real tim
 ### Course Description
 Variety of issues regarding the real-time application of embedded microprocessor systems, problems of real-time computer applications in process control or similar areas, digital processing, the physics of sensors and transducers, signal representation, and system design and software development, applications on automotive control, biomedical instrumentation, communication systems, speech processing, data compression and audio processing.
 
-### Course Instuctor
-[Dr. Hanna Bullata](hbullata@birzeit.edu)
+### Course Instuctor & Author of Code Samples
+[Dr. Hanna Bullata](mailto:hbullata@birzeit.edu)
 
 
 
@@ -23,13 +23,13 @@ Variety of issues regarding the real-time application of embedded microprocessor
 
 ## [PIC16F877A Assembly Examples](./9_pic_assembly)
 
-* [ADC](./ADC): Analog to digital convertison to read a temperature sensor and trigger an LED
-* [Calculator](./CALC): A simple calculator that can add, subtract, multiply, and divide two numbers. output is displayed on a 16x2 LCD.
-* [Keypad](./KEYPAD): Reads a 4x4 keypad and displays the key pressed on a 7-segment display.
-* [ISR Keypad](./KEYPAD_ISR): modified version of the keypad example that uses interrupts to read the keypad.
-* [LED Timer](./LED1H): A timer that displays its output to a set of LEDs
-* [Timer ISR](./TIMER): Flips an LED on and off every 2.5 seconds using a TIMER0 interrupt service routine.
-* [Analogue Input](./VINTEST): Analogue input using an external reference voltage of 2.56V
+* [ADC](./9_pic_assembly/ADC): Analog to digital convertison to read a temperature sensor and trigger an LED
+* [Calculator](./9_pic_assembly/CALC): A calculator that can add, subtract, multiply, and divide two numbers. output to a 16x2 LCD.
+* [Keypad](./9_pic_assembly/KEYPAD): Reads a 4x4 keypad and displays the key pressed on a 7-segment display.
+* [ISR Keypad](./9_pic_assembly/KEYPAD_ISR): modified version of the keypad example that uses interrupts to read the keypad.
+* [LED Timer](./9_pic_assembly/LED1H): A timer that displays its output to a set of LEDs
+* [Timer ISR](./9_pic_assembly/TIMER): Flips an LED on and off every 2.5 seconds using a TIMER0 interrupt service routine.
+* [Analogue Input](./9_pic_assembly/VINTEST): Analogue input using an external reference voltage of 2.56V
 
 
 
