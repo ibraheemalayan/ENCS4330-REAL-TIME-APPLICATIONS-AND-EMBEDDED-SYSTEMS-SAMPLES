@@ -14,36 +14,39 @@
 
 TEMP	EQU 0x75		; Temp store
 TEMP2	EQU 0x76		; Temp2 store
+Timer1	EQU 0x77		; Timer1 store
 
 
 ; ---------------------------------
 ; ----------- Code Area -----------
 ; ---------------------------------
 
-    ORG	0x0000 		; Start of program memory
-    NOP			; For ICD mode
-    GOTO START_EXECUTION
+	ORG	0x0000 		; Start of program memory
+	NOP			; For ICD mode
+	GOTO START_EXECUTION
 
 	
 
-SETUP_PORT_A_ANALOG_PORT_C_DIGITAL
+SETUP_PORTS
 
-    ; port c is used for debugging
+	; setup port A as analog input, port C as digital output
+
+	; port c is used for LED
 	BANKSEL TRISC
 	MOVLW	0x00		; In order to set PORTC Direction to output
 	MOVWF	TRISC
 
 
-    BANKSEL TRISA
-    MOVLW	0x01		; In order to set PORTA - Pin 0 Direction to input
+	BANKSEL TRISA
+	MOVLW	0x01		; In order to set PORTA - Pin 0 Direction to input
 
-    BANKSEL ADCON0
-    MOVLW  0x41        ; Select Channel 0, Turn on A/D Conversion, Fosc/8, ADC currently stopped
-    MOVWF  ADCON0
+	BANKSEL ADCON0
+	MOVLW  0x41		; Select Channel 0, Turn on A/D Conversion, Fosc/8, ADC currently stopped
+	MOVWF  ADCON0
 
 	BANKSEL ADCON1 
 	MOVLW	0x0E		; set PORTA - AN0 as analog input, rest as digital
-                        ; and set result as left justified (ADRESH, ADRESL)
+						; and set result as left justified (ADRESH, ADRESL)
 	MOVWF	ADCON1
  
 	BANKSEL CMCON 
@@ -54,44 +57,58 @@ SETUP_PORT_A_ANALOG_PORT_C_DIGITAL
 
 READ_ADC
 
-    BANKSEL ADCON0
-    BSF ADCON0, GO       ; Start A/D Conversion
+	CALL onems ; 1ms delay to allow ADC to settle ( mute ADC warnings in Proteus )
+
+	BANKSEL ADCON0
+	BSF ADCON0, GO	   ; Start A/D Conversion
 loop
-    BTFSC ADCON0, GO     ; Wait for A/D Conversion to complete
-    GOTO loop
+	BTFSC ADCON0, GO	 ; Wait for A/D Conversion to complete
+	GOTO loop
 
-    BANKSEL ADRESH
-    MOVF ADRESH, W       ; Read the converted data most significant byte
-    MOVWF TEMP           ; Store the converted data in TEMP
+	BANKSEL ADRESH
+	MOVF ADRESH, W	   ; Read the converted data most significant byte
+	MOVWF TEMP		   ; Store the converted data in TEMP
 
-    ; ignore the least significant 2 bits of the result (10 bit ADC)
-    ; compare the result with 0x40 (64 -> 256) (1.25V)
+	; ignore the least significant 2 bits of the result (10 bit ADC)
+	; compare the result with appropriate digital value for (0.4V ~ 40 C) 
+	; digital value = (0.4V / 5V) * 1024 = 82
+	; but since we are ignoring the least significant 2 bits, we compare with 82/4 = 20 (0x14)
 
-    BANKSEL PORTC
+	BANKSEL PORTC
 
-    ; Test TEMP ≤ ( 0x40 , 1.25V )
+	; Test TEMP ≤ 40 C
 
-    MOVF TEMP,W
-    SUBLW 0x40
-    BTFSS STATUS, C
-    GOTO TEMP_GT_K
+	MOVF TEMP,W
+	SUBLW 0x14
+	BTFSS STATUS, C
+	GOTO TEMP_GT_K
 TEMP_LE_K
-    BCF PORTC, 2
-    CALL READ_ADC
+	BCF PORTC, 2
+	CALL READ_ADC
 TEMP_GT_K
-    BSF PORTC, 2
-    CALL READ_ADC
+	BSF PORTC, 2
+	CALL READ_ADC
 
 START_EXECUTION
 
-    BANKSEL PORTC
-    MOVLW	0x00
+	BANKSEL PORTC
+	MOVLW	0x00
 	MOVWF	PORTC
 
-	CALL INIT_DEBUG_PORT
-    CALL SETUP_PORT_A_ANALOG_PORT_C_DIGITAL
+	CALL SETUP_PORTS
 
 	CALL READ_ADC ; read adc
+
+
+;--------------------------------------------------------------------------------------------	
+;	1ms delay with 1us cycle time (1000 cycles)
+;--------------------------------------------------------------------------------------------	
+onems	MOVLW	D'249'		; Count for 1ms delay 
+	MOVWF	Timer1		; Load count
+loop1	NOP			; Pad for 4 cycle loop
+	DECFSZ	Timer1, 1		; Count
+	GOTO	loop1		; until Z
+	RETURN			; and finish
 
 DONE
 	END
