@@ -42,6 +42,8 @@ Variety of issues regarding the real-time application of embedded microprocessor
 * [Microchip PIC16F877A Datasheet](https://ww1.microchip.com/downloads/en/devicedoc/39582b.pdf)
 * [PIC Assembly Language Cheatsheet](http://www.niplesoft.com/blog/wp-content/uploads/2016/02/PIC-ASM-Cheatsheet.pdf)
 * [PIC Timers 0/1/2 Cheatsheet](https://exploreembedded.com/wiki/PIC16f877a_Timer)
+* [16x2 LCD Usage](https://circuitdigest.com/article/16x2-lcd-display-module-pinout-datasheet)
+
 
 ### Repository Author (NOT code author)
 Website: [Ibraheem Alyan](https://www.ibraheemalyan.dev/)    
