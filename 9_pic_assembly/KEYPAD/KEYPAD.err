@@ -1,7 +1,0 @@
-Message[302] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\KEYPAD\KEYPAD.ASM 25 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[302] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\KEYPAD\KEYPAD.ASM 27 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\KEYPAD\KEYPAD.ASM 35 : Using default destination of 1 (file).
-Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\KEYPAD\KEYPAD.ASM 39 : Using default destination of 1 (file).
-Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\KEYPAD\KEYPAD.ASM 43 : Using default destination of 1 (file).
-Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\KEYPAD\KEYPAD.ASM 56 : Using default destination of 1 (file).
-Message[305] D:\HANNA\BZU-2019\1STSEM\ENCS531\PIC_EXAMPLES(3)\KEYPAD\KEYPAD.ASM 66 : Using default destination of 1 (file).

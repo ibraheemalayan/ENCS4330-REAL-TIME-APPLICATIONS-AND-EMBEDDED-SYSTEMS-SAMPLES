@@ -1,8 +1,0 @@
-Message[302] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 69 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[302] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 71 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[302] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 74 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[305] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 82 : Using default destination of 1 (file).
-Message[305] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 86 : Using default destination of 1 (file).
-Message[305] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 90 : Using default destination of 1 (file).
-Message[305] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 103 : Using default destination of 1 (file).
-Message[305] C:\PERSONAL\ENCS531\PIC_EXAMPLES\KEYPAD_ISR\KEYPAD.ASM 113 : Using default destination of 1 (file).

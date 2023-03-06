@@ -1,5 +1,0 @@
-Warning[207] D:\HANNA\BZU-2020\2NDSEM\ENCS531\PIC_EXAMPLES(3)\LED1H\LED1H.ASM 41 : Found label after column 1. (MOVLZ)
-Error[124]   D:\HANNA\BZU-2020\2NDSEM\ENCS531\PIC_EXAMPLES(3)\LED1H\LED1H.ASM 41 : Illegal argument (expected single character)
-Message[302] D:\HANNA\BZU-2020\2NDSEM\ENCS531\PIC_EXAMPLES(3)\LED1H\LED1H.ASM 42 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[302] D:\HANNA\BZU-2020\2NDSEM\ENCS531\PIC_EXAMPLES(3)\LED1H\LED1H.ASM 47 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[305] D:\HANNA\BZU-2020\2NDSEM\ENCS531\PIC_EXAMPLES(3)\LED1H\LED1H.ASM 66 : Using default destination of 1 (file).
