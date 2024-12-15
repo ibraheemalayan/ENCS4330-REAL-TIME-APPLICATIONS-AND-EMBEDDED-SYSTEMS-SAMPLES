@@ -5,9 +5,19 @@ This repository contains code samples and resources for the [ENCS4330 - Real tim
 ### Course Description
 Variety of issues regarding the real-time application of embedded microprocessor systems, problems of real-time computer applications in process control or similar areas, digital processing, the physics of sensors and transducers, signal representation, and system design and software development, applications on automotive control, biomedical instrumentation, communication systems, speech processing, data compression and audio processing.
 
+## My Projects
+* [OpenGL Race Simulation](https://github.com/ibraheemalayan/first_project_the_big_race)
+    > A multi-processing race simulation, written in C & OpenGL, using signals & named pipes.
+* [Factory OpenGL Simulation](https://github.com/ibraheemalayan/factory_opengl_simulation)
+    > A multi-threaded multi-processing application that simulates the behavior of a chocolate-manufacturing factory., written in C & OpenGL, using Linux IPC techniques for synchronization.
+* [OIM OpenGL Simulation](https://github.com/ibraheemalayan/OIM_opengl_simulation)
+    > ⚠️ THIS PROJECT HAS NEVER BEEN FINISHED ⚠️
+* [PIC16F877A LCD Assembly](https://github.com/ibraheemalayan/PIC16F877A_LCD_Assembly)
+    > control a 16x2 LCD using PIC16F877A assembly and a push button with timer interrupts to change the displayed text.
+
+
 ### Course Instuctor & Author of Code Samples
 [Dr. Hanna Bullata](mailto:hbullata@birzeit.edu)
-
 
 
 ## C Code Samples
@@ -44,16 +54,6 @@ Variety of issues regarding the real-time application of embedded microprocessor
 * [PIC Timers 0/1/2 Cheatsheet](https://exploreembedded.com/wiki/PIC16f877a_Timer)
 * [16x2 LCD Usage](https://circuitdigest.com/article/16x2-lcd-display-module-pinout-datasheet)
 
-## My Projects
-* [OpenGL Race Simulation](https://github.com/ibraheemalayan/first_project_the_big_race)
-    > A multi-processing race simulation, written in C & OpenGL, using signals & named pipes.
-* [Factory OpenGL Simulation](https://github.com/ibraheemalayan/factory_opengl_simulation)
-    > A multi-threaded multi-processing application that simulates the behavior of a chocolate-manufacturing factory., written in C & OpenGL, using Linux IPC techniques for synchronization.
-* [OIM OpenGL Simulation](https://github.com/ibraheemalayan/OIM_opengl_simulation)
-    > ⚠️ THIS PROJECT HAS NEVER BEEN FINISHED ⚠️
-* [PIC16F877A LCD Assembly](https://github.com/ibraheemalayan/PIC16F877A_LCD_Assembly)
-    > control a 16x2 LCD using PIC16F877A assembly and a push button with timer interrupts to change the displayed text.
-
-### Repository Author (NOT code author)
-Website: [Ibraheem Alyan](https://www.ibraheemalyan.dev/)    
-Email: contact@ibraheemalyan.dev
+### Repository Author
+Website: [Ibraheem Alyan](https://www.ibraheemalayan.dev/)    
+Email: contact@ibraheemalayan.dev
