@@ -16,7 +16,7 @@ Variety of issues regarding the real-time application of embedded microprocessor
     > control a 16x2 LCD using PIC16F877A assembly and a push button with timer interrupts to change the displayed text.
 
 
-### Course Instuctor & Author of Code Samples
+### Course Instuctor
 [Dr. Hanna Bullata](mailto:hbullata@birzeit.edu)
 
 
